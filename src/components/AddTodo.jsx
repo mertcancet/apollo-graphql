@@ -10,27 +10,22 @@ const ADD_TODO = gql`
   }
 `;
 
+const GET_TODOS = gql`
+  {
+    todos {
+      id
+      type
+    }
+  }
+`;
+
 function AddTodo() {
   let input;
   const [addTodo] = useMutation(ADD_TODO, {
-    update(cache, { data: { addTodo } }) {
-      cache.modify({
-        fields: {
-          todos(existingTodos = []) {
-            const newTodoRef = cache.writeFragment({
-              data: addTodo,
-              fragment: gql`
-                fragment NewTodo on Todo {
-                  id
-                  type
-                }
-              `,
-            });
-            return existingTodos.concat(newTodoRef);
-          },
-        },
-      });
-    },
+    refetchQueries: [
+      GET_TODOS, // DocumentNode object parsed with gql
+      "GetTodos", // Query name
+    ],
   });
 
   return (
